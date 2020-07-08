@@ -1,6 +1,29 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+const apiurl = 'https://itunes.apple.com/search?term=';
 
 class Home extends StatelessWidget {
+  String searchTerm;
+  String song;
+  String artist;
+  String imageurl;
+
+  Future searchSong(String searchTerm) async {
+    http.Response response = await http.get('$apiurl$searchTerm');
+    if (response.statusCode == 200) {
+      print('Sucess ${response.statusCode}');
+      var decodedBody = jsonDecode(response.body);
+      print(decodedBody);
+      //double rate = decodedBody['rate'];
+    } else {
+      print('failed ${response.statusCode}');
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -19,6 +42,9 @@ class Home extends StatelessWidget {
                   child: TextField(
                     decoration: InputDecoration(
                         border: InputBorder.none, hintText: 'Search music'),
+                    onChanged: (text) {
+                      searchTerm = text;
+                    },
                   ),
                 ),
                 RaisedButton(
@@ -26,7 +52,9 @@ class Home extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.0),
                       side: BorderSide(color: Colors.black)),
-                  onPressed: () {},
+                  onPressed: () {
+                    searchSong(searchTerm);
+                  },
                   child: Text('Search'),
                 ),
                 SizedBox(
