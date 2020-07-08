@@ -5,19 +5,22 @@ import 'package:http/http.dart' as http;
 
 const apiurl = 'https://itunes.apple.com/search?term=';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  String textEntered;
   String searchTerm;
-  String song;
-  String artist;
-  String imageurl;
 
   Future searchSong(String searchTerm) async {
-    http.Response response = await http.get('$apiurl$searchTerm');
+    http.Response response = await http.get('$apiurl$searchTerm&limit=25');
     if (response.statusCode == 200) {
       print('Sucess ${response.statusCode}');
       var decodedBody = jsonDecode(response.body);
-      print(decodedBody);
-      //double rate = decodedBody['rate'];
+      print(decodedBody['results'][0]['artistName']);
+      return decodedBody;
     } else {
       print('failed ${response.statusCode}');
       return;
@@ -43,7 +46,7 @@ class Home extends StatelessWidget {
                     decoration: InputDecoration(
                         border: InputBorder.none, hintText: 'Search music'),
                     onChanged: (text) {
-                      searchTerm = text;
+                      textEntered = text;
                     },
                   ),
                 ),
@@ -53,7 +56,9 @@ class Home extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14.0),
                       side: BorderSide(color: Colors.black)),
                   onPressed: () {
-                    searchSong(searchTerm);
+                    setState(() {
+                      searchTerm = textEntered;
+                    });
                   },
                   child: Text('Search'),
                 ),
@@ -65,14 +70,26 @@ class Home extends StatelessWidget {
             SizedBox(
               height: 16.0,
             ),
-            Flexible(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2),
-                itemBuilder: (_, index) => FlutterLogo(),
-                itemCount: 8,
-              ),
-            )
+            searchTerm != null
+                ? FutureBuilder(
+                    future: searchSong(searchTerm),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      } else {
+                        return Flexible(
+                          child: GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2),
+                            itemBuilder: (_, index) => Text(
+                                '${snapshot.data['results'][0]['artistName']}'),
+                            itemCount: 8,
+                          ),
+                        );
+                      }
+                    })
+                : Text('Discover music'),
           ],
         ),
       ),
