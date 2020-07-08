@@ -44,7 +44,9 @@ class _HomeState extends State<Home> {
                 Flexible(
                   child: TextField(
                     decoration: InputDecoration(
-                        border: InputBorder.none, hintText: 'Search music'),
+                        fillColor: Colors.pink,
+                        border: InputBorder.none,
+                        hintText: 'Search music'),
                     onChanged: (text) {
                       textEntered = text;
                     },
@@ -56,6 +58,7 @@ class _HomeState extends State<Home> {
                       borderRadius: BorderRadius.circular(14.0),
                       side: BorderSide(color: Colors.black)),
                   onPressed: () {
+                    FocusScope.of(context).unfocus();
                     setState(() {
                       searchTerm = textEntered;
                     });
@@ -79,17 +82,42 @@ class _HomeState extends State<Home> {
                       } else {
                         return Flexible(
                           child: GridView.builder(
+                            padding: EdgeInsets.all(16),
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
-                            itemBuilder: (_, index) => Text(
-                                '${snapshot.data['results'][0]['artistName']}'),
-                            itemCount: 8,
+                            itemBuilder: (_, index) => Container(
+                              color: Colors.white10,
+                              child: Column(
+                                children: <Widget>[
+                                  Image.network(
+                                    snapshot.data['results'][index]
+                                        ['artworkUrl100'],
+                                  ),
+                                  Text(
+                                    '${snapshot.data['results'][index]['trackName']}',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                      '${snapshot.data['results'][index]['artistName']}')
+                                ],
+                              ),
+                            ),
+                            itemCount: 24,
                           ),
                         );
                       }
                     })
-                : Text('Discover music'),
+                : Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Text(
+                      'Discover music',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
           ],
         ),
       ),
